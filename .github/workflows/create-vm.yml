@@ -48,7 +48,7 @@ jobs:
             --shape "VM.Standard.A1.Flex" \
             --shape-config '{"ocpus":4,"memoryInGBs":24}' \
             --subnet-id "${{ secrets.OCI_SUBNET_ID }}" \
-            --image-id "ocid1.image.oc1.us-phoenix-1.aaaaaaaamdfw3fc57v7fgnbe73ff2g6m7qivwftj7mgtgwhly3gofp43pdxa" \
+            --image-id "Ubuntu-22.04-Minimal-aarch64" \
             --ssh-authorized-keys-file "/home/runner/my_ssh_key.pub" \
             --assign-public-ip true \
             --display-name "oracle-arm-vps" \
