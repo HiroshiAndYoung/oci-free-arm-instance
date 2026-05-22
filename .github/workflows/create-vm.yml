@@ -1,0 +1,50 @@
+name: Try to Create OCI VM
+
+on:
+  workflow_dispatch: # 允许你手动点击测试
+  schedule:
+    - cron: '*/10 * * * *' # 每 10 分钟自动在后台帮你抢一次
+
+jobs:
+  create-instance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Write OCI Private Key
+        run: |
+          mkdir -p ~/.oci
+          echo "${{ secrets.OCI_CLI_KEY_CONTENT }}" > ~/.oci/oci_api_key.pem
+          chmod 600 ~/.oci/oci_api_key.pem
+
+      - name: Set up OCI CLI & Try Create Instance
+        env:
+          OCI_CLI_USER: ${{ secrets.OCI_CLI_USER }}
+          OCI_CLI_TENANCY: ${{ secrets.OCI_CLI_TENANCY }}
+          OCI_CLI_FINGERPRINT: ${{ secrets.OCI_CLI_FINGERPRINT }}
+          OCI_CLI_REGION: ${{ secrets.OCI_CLI_REGION }}
+        run: |
+          # 自动安装甲骨文官方 CLI 命令行工具
+          bash -c "$(curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh)" -- --accept-all-defaults
+          export PATH=$PATH:$HOME/bin
+          
+          # 正式调 API 提交开机申请
+          oci compute instance launch \
+            --availability-domain "${{ secrets.AD_NAME }}" \
+            --compartment-id "${{ secrets.OCI_COMPARTMENT_ID }}" \
+            --shape "VM.Standard.A1.Flex" \
+            --shape-config '{"ocpus":4,"memoryInGBs":24}' \
+            --image-id "${{ secrets.IMAGE_ID }}" \
+            --subnet-id "${{ secrets.OCI_SUBNET_ID }}" \
+            --boot-volume-size-in-gbs 150 \
+            --assign-public-ip true \
+            --metadata '{"ssh_authorized_keys": "${{ secrets.SSH_PUBLIC_KEY }}"}' \
+            --display-name "oracle-arm-vps" || true
+
+      - name: Notify Discord
+        run: |
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d '{"content": "🤖 甲骨文抢机状态汇报：已尝试向机房提交创建请求。如果成功，请尽快登录控制台查看！"}' \
+               "${{ secrets.DISCORD_WEBHOOK_URL }}"
