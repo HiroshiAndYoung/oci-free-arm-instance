@@ -32,5 +32,4 @@ jobs:
           OCI_IMAGE_ID: ${{ secrets.OCI_IMAGE_ID }}
           OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
         run: |
-          # 运行项目目录下的主要 Python 脚本
-          python main.py
+          python -m oci_free_arm_instance
