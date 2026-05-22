@@ -20,11 +20,9 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install oci
-          pip install .
 
       - name: Run Oracle Script
         env:
-          # 脚本读取你刚刚配置好的 7 个 Secrets 变量
           OCI_TENANCY_ID: ${{ secrets.OCI_TENANCY_ID }}
           OCI_USER_ID: ${{ secrets.OCI_USER_ID }}
           OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
@@ -33,4 +31,5 @@ jobs:
           OCI_IMAGE_ID: ${{ secrets.OCI_IMAGE_ID }}
           OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
         run: |
-          python -m oci_free_arm_instance
+          # 既然不能安装，我们直接用 Python 执行该目录下的核心文件
+          python oci_free_arm_instance/main.py
